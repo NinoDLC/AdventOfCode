@@ -1,6 +1,23 @@
 package utils
 
-fun print2DPositions(positions: List<Triple<Int, Int, Any>>) {
+import java.lang.IllegalStateException
+
+fun print2DPositions(
+    positions: Collection<Pair<Int, Int>>,
+    exhaustive: Boolean = false
+) {
+    print2DPositionsWithSign(
+        positions = positions.map {
+            Triple(it.first, it.second, '#')
+        },
+        exhaustive = exhaustive
+    )
+}
+
+fun print2DPositionsWithSign(
+    positions: Collection<Triple<Int, Int, Any>>,
+    exhaustive: Boolean = false
+) {
     val stringBuilder = StringBuilder()
 
     val xMax = positions.maxOf { it.first }
@@ -8,11 +25,19 @@ fun print2DPositions(positions: List<Triple<Int, Int, Any>>) {
 
     for (y in 0..yMax) {
         for (x in 0..xMax) {
-            val existing = positions.first {
+            val existing = positions.find {
                 it.first == x && it.second == y
             }
 
-            stringBuilder.append(existing.third)
+            if (existing == null) {
+                if (exhaustive) {
+                    throw IllegalStateException("Position x=$x,y=$y does not exist in the collection !")
+                } else {
+                    stringBuilder.append('.')
+                }
+            } else {
+                stringBuilder.append(existing.third)
+            }
         }
         stringBuilder.append("\n")
     }
