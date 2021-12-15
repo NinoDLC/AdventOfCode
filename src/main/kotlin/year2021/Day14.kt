@@ -35,22 +35,37 @@ class Day14 {
     private fun runPolymerisation(lines: List<String>, times: Int) {
         val polymerRules = lines.drop(2).map { Triple(it.first(), it[1], it.last()) }
 
-        (0 until times).fold(lines.first().toList()) { acc: List<Char>, time ->
-            println("$time: ${acc.size}")
-            acc.mapIndexed { index, char ->
-                val next = acc.getOrNull(index + 1)
+        var currentPolymerPairs: MutableMap<Pair<Char, Char>, Long> = lines
+            .first()
+            .zipWithNext()
+            .groupingBy { it }
+            .eachCount()
+            .mapValues { it.value.toLong() }
+            .toMutableMap()
 
-                if (next == null) {
-                    listOf(char)
-                } else {
-                    listOf(char, getNewPolymer(char, next, polymerRules))
-                }
-            }.flatten()
-        }.groupingBy {
-            it
-        }.eachCount().entries.sortedByDescending {
-            it.value
-        }.let {
+        val polymerCount = mutableMapOf<Char, Long>()
+
+        lines.first().forEach {
+            polymerCount.merge(it, 1) { previous, new -> previous + new }
+        }
+
+        repeat(times) {
+            val newPolymerPairs = mutableMapOf<Pair<Char, Char>, Long>()
+
+            currentPolymerPairs.forEach { entry ->
+                val newPolymer = getNewPolymer(entry.key.first, entry.key.second, polymerRules)
+                val leftPair = Pair(entry.key.first, newPolymer)
+                val rightPair = Pair(newPolymer, entry.key.second)
+
+                polymerCount.merge(newPolymer, entry.value) { previous, new -> previous + new }
+                newPolymerPairs[leftPair] = newPolymerPairs.getOrPut(leftPair) { 0 } + entry.value
+                newPolymerPairs[rightPair] = newPolymerPairs.getOrPut(rightPair) { 0 } + entry.value
+            }
+
+            currentPolymerPairs = newPolymerPairs
+        }
+
+        polymerCount.entries.sortedByDescending { it.value }.let {
             println(it.first().value - it.last().value)
         }
     }
