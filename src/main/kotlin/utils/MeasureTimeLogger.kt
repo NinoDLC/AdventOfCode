@@ -2,9 +2,11 @@ package utils
 
 import kotlin.system.measureTimeMillis
 
-fun logMeasureTime(block: () -> Unit) {
+fun <T> logMeasureTime(block: () -> T) : T {
+    val result: T
+
     measureTimeMillis {
-        block.invoke()
+        result = block.invoke()
     }.let {
         println(
             if (it < 1_000) {
@@ -14,4 +16,6 @@ fun logMeasureTime(block: () -> Unit) {
             }
         )
     }
+
+    return result
 }
