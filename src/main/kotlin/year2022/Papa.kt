@@ -2,6 +2,8 @@ package year2022
 
 import utils.logMeasureTime
 import java.io.File
+import java.util.*
+import kotlin.collections.HashMap
 
 class Papa {
 
@@ -24,13 +26,17 @@ class Papa {
         }
     }
 
+    var crawled = 0
+
     private fun buildFrenchTreeDict(lines: List<String>): Node {
-        val treeDict = Node("", mutableListOf(), false)
+        val treeDict = Node(null, mutableListOf(), false)
         var wordsDone = 0
         var lettersDone = 0
         var nodesCreated = 0
 
-        lines.forEach { line ->
+        lines.map {
+            it.lowercase(Locale.FRENCH)
+        }.forEach { line ->
             var currentNode = treeDict
             line.forEachIndexed { index, char ->
                 currentNode = currentNode.children.find { char == it.char } ?: Node(
@@ -66,10 +72,24 @@ class Papa {
         val maxX = input.maxOf { it.size - 1 }
         val maxY = input.size - 1
 
-        for (x in 0..maxX) {
-            for (y in 0..maxY) {
-                crawl(frenchTreeDict, words, "", input, x, y, maxX, maxY)
+        for (y in 0..maxY) {
+            for (x in 0..maxX) {
+                println("Words starting at [x=$x,y=$y] (${input[y][x]}): ")
+                crawl(frenchTreeDict, words, "", input, x, y, maxX, maxY, listOf(Position(x, y)))
             }
+        }
+
+        println("Crawled count: $crawled")
+        println("Unique words found: ${words.size}")
+        println("Words found: ${words.values.sum()}")
+        println("Words:")
+        words.toSortedMap().forEach {
+            print(it.key)
+            val spaces = 10 - it.key.length
+            for (i in 0..spaces) {
+                print(" ")
+            }
+            println("(${it.value} times)")
         }
     }
 
@@ -81,74 +101,50 @@ class Papa {
         x: Int,
         y: Int,
         maxX: Int,
-        maxY: Int
+        maxY: Int,
+        previousPositions: List<Position>
     ) {
-
-        val newWord = wordSoFar + input[y][x]
+        crawled++
+        val newWord = wordSoFar + input[y][x].lowercase()
 
         val (dictContainsWord, canContinue) = dictContainsWord(frenchTreeDict, newWord)
 
         if (newWord.length >= 4 && dictContainsWord) {
-            println("Found $newWord")
+            println(newWord)
             words[newWord] = words.getOrDefault(newWord, 0) + 1
         }
 
-        // Order: N, NW, NE, S, SW, SE, W, E
-
         if (canContinue) {
-            // North
-            if (y - 1 >= 0) {
-                crawl(frenchTreeDict, words, newWord, input, x, y - 1, maxX, maxY)
+            val newPositions = listOf(
+                Position(x = x + 1, y = y),     // East
+                Position(x = x + 1, y = y + 1), // SE
+                Position(x = x, y = y + 1),     // South
+                Position(x = x - 1, y = y + 1), // SW
+                Position(x = x - 1, y = y),     // West
+                Position(x = x - 1, y = y - 1), // NW
+                Position(x = x, y = y - 1),     // North
+                Position(x = x + 1, y = y - 1), // NE
+            )
 
-                // NW
-                if (x - 1 >= 0) {
-                    crawl(frenchTreeDict, words, newWord, input, x - 1, y - 1, maxX, maxY)
+            newPositions.forEach { newPosition ->
+                if (newPosition.x in 0..maxX
+                    && newPosition.y in 0..maxY
+                    && !previousPositions.contains(newPosition)
+                ) {
+                    crawl(
+                        frenchTreeDict = frenchTreeDict,
+                        words = words,
+                        wordSoFar = newWord,
+                        input = input,
+                        x = newPosition.x,
+                        y = newPosition.y,
+                        maxX = maxX,
+                        maxY = maxY,
+                        previousPositions = previousPositions + newPosition
+                    )
                 }
-
-                // NE
-                if (x + 1 <= maxX) {
-                    crawl(frenchTreeDict, words, newWord, input, x + 1, y - 1, maxX, maxY)
-                }
-            }
-
-            // South
-            if (y + 1 <= maxY) {
-                crawl(frenchTreeDict, words, newWord, input, x, y + 1, maxX, maxY)
-
-                // SW
-                if (x - 1 >= 0) {
-                    crawl(frenchTreeDict, words, newWord, input, x - 1, y + 1, maxX, maxY)
-                }
-
-                // SE
-                if (x + 1 <= maxX) {
-                    crawl(frenchTreeDict, words, newWord, input, x + 1, y + 1, maxX, maxY)
-                }
-            }
-
-            // West
-            if (x - 1 >= 0) {
-                crawl(frenchTreeDict, words, newWord, input, x - 1, y, maxX, maxY)
-            }
-
-            // East
-            if (x + 1 <= maxX) {
-                crawl(frenchTreeDict, words, newWord, input, x + 1, y, maxX, maxY)
             }
         }
-
-
-//        return children.fold(0) { acc, node ->
-//            when {
-//                node.isWord -> {
-//                    val word = "$wordSoFar${node.char}"
-//                    println(word)
-//                    acc + 1 + crawl(lines, node.children, "$wordSoFar${node.char}")
-//                }
-//                node.children.isEmpty() -> throw IllegalStateException(node.toString())
-//                else -> acc + crawl(lines, node.children, wordSoFar + node.char)
-//            }
-//        }
     }
 
     /**
@@ -161,12 +157,17 @@ class Papa {
             node = node.children.find { it.char == char } ?: return false to false
         }
 
-        return true to node.children.isNotEmpty()
+        return node.isWord to node.children.isNotEmpty()
     }
 
     data class Node(
-        val char: String,
+        val char: Char?,
         val children: MutableList<Node>,
         val isWord: Boolean
+    )
+
+    data class Position(
+        val x: Int,
+        val y: Int
     )
 }
