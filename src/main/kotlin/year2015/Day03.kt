@@ -58,7 +58,7 @@ class Day03 {
         else -> throw IllegalStateException("Unknown char: $char")
     }
 
-    data class Position(
+    private data class Position(
         val x: Int,
         val y: Int,
     )
