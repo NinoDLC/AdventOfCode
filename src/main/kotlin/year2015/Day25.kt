@@ -1,5 +1,6 @@
 package year2015
 
+import utils.getPuzzleInput
 import utils.logMeasureTime
 
 class Day25 {
@@ -7,54 +8,53 @@ class Day25 {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
+            val lines = getPuzzleInput(this)
+
             println("=== Part One ===")
             logMeasureTime {
-                partOne()
+                Day25().partOne(lines)
             }
             println()
 
             println("=== Part Two ===")
             logMeasureTime {
-                partTwo()
+                Day25().partTwo(lines)
             }
             println()
         }
 
-        private fun partOne() {
-            val map = Array<Array<Long>>(10_000) {
-                Array(10_000) {
-                    0
-                }
-            }
-
-            map[1][1] = 20151125
-
-            var xMax = 2
-            while (true) {
-                var y = 1
-                for (x in xMax downTo 1) {
-                    val previousNumber = if (y == 1) {
-                        map[1][x - 1]
-                    } else {
-                        map[x + 1][y - 1]
-                    }
-
-                    map[x][y] = (previousNumber * 252533) % 33554393
-
-                    if (x == 2981 && y == 3075) {
-                        println(map[x][y])
-                        return
-                    }
-
-                    y++
-                }
-
-                xMax++
-            }
-        }
-
-        private fun partTwo() {
-            println()
-        }
+        @Suppress("RegExpRepeatedSpace")
+        private val ROW_COLUMN_REGEX =
+            "To continue, please consult the code grid in the manual.  Enter the code at row ([0-9]+), column ([0-9]+).".toRegex()
     }
+
+    private fun partOne(lines: List<String>) {
+        val (x, y) = getTargetRowAndColumn(lines)
+
+        var currentValue = 20151125L
+        var currentX = 1
+        var currentY = 1
+
+        while (currentX != x || currentY != y) {
+            currentValue = (currentValue * 252533) % 33554393
+            if (currentY == 1) {
+                currentY = currentX + 1
+                currentX = 1
+            } else {
+                currentY--
+                currentX++
+            }
+        }
+
+        println(currentValue)
+    }
+
+    private fun partTwo(lines: List<String>) {
+        println(lines)
+    }
+
+    private fun getTargetRowAndColumn(lines: List<String>): Pair<Int, Int> =
+        ROW_COLUMN_REGEX.find(lines.first())!!.destructured.toList().map { it.toInt() }.let {
+            it.component2() to it.component1()
+        }
 }
