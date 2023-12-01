@@ -26,19 +26,18 @@ class Day01 {
 
     private fun partOne(lines: List<String>) {
         println(
-            lines.fold(0) { acc, line ->
+            lines.sumOf { line ->
                 val firstNumber: Int = line.firstNotNullOf { it.digitToIntOrNull() }
                 val lastNumber: Int = line.reversed().firstNotNullOf { it.digitToIntOrNull() }
-                val finalNumber: Int = firstNumber * 10 + lastNumber
 
-                acc + finalNumber
+                firstNumber * 10 + lastNumber
             }
         )
     }
 
     private fun partTwo(lines: List<String>) {
         println(
-            lines.fold(0) { acc, line ->
+            lines.sumOf { line ->
                 val groups: List<String> = line.indices.map {
                     line.substring(it, (it + 5).coerceAtMost(line.length))
                 }
@@ -51,7 +50,7 @@ class Day01 {
                     group.first().digitToIntOrNull() ?: getAsWrittenNumber(group)
                 }
 
-                acc + firstNumber * 10 + lastNumber
+                firstNumber * 10 + lastNumber
             }
         )
     }
