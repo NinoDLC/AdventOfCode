@@ -93,12 +93,9 @@ class Plane<T : Any>(
         yProgression: IntProgression = 0 until yMax,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): ItemPosition<T>? {
-        yProgression.forEach { y ->
-            xProgression.forEach { x ->
-                val itemPosition = get(x, y)
-                if (predicate(itemPosition)) {
-                    return itemPosition
-                }
+        forEach(xProgression, yProgression) { item ->
+            if (predicate(item)) {
+                return item
             }
         }
 
@@ -128,10 +125,8 @@ class Plane<T : Any>(
         yProgression: IntProgression = 0 until yMax,
         lambda: (itemPosition: ItemPosition<T>) -> T,
     ) {
-        yProgression.forEach { y ->
-            xProgression.forEach { x ->
-                transform(x, y, lambda)
-            }
+        forEach(xProgression, yProgression) { item ->
+            rows[item.position.x][item.position.y] = lambda(item)
         }
     }
 
@@ -145,10 +140,8 @@ class Plane<T : Any>(
         operation: (acc: R, itemPosition: ItemPosition<T>) -> R,
     ): R {
         var accumulator = initialValue
-        yProgression.forEach { y ->
-            xProgression.forEach { x ->
-                accumulator = operation(accumulator, get(x, y))
-            }
+        forEach(xProgression, yProgression) { item ->
+            accumulator = operation(accumulator, item)
         }
         return accumulator
     }
@@ -169,11 +162,9 @@ class Plane<T : Any>(
         yProgression: IntProgression = 0 until yMax,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): Boolean {
-        yProgression.forEach { y ->
-            xProgression.forEach { x ->
-                if (!predicate(get(x, y))) {
-                    return false
-                }
+        forEach(xProgression, yProgression) { item ->
+            if (!predicate(item)) {
+                return false
             }
         }
 
@@ -185,11 +176,9 @@ class Plane<T : Any>(
         yProgression: IntProgression = 0 until yMax,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): Boolean {
-        yProgression.forEach { y ->
-            xProgression.forEach { x ->
-                if (predicate(get(x, y))) {
-                    return true
-                }
+        forEach(xProgression, yProgression) { item ->
+            if (predicate(item)) {
+                return true
             }
         }
 
@@ -201,15 +190,82 @@ class Plane<T : Any>(
         yProgression: IntProgression = 0 until yMax,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): Boolean {
-        yProgression.forEach { y ->
-            xProgression.forEach { x ->
-                if (predicate(get(x, y))) {
-                    return false
-                }
+        forEach(xProgression, yProgression) { item ->
+            if (predicate(item)) {
+                return false
             }
         }
 
         return true
+    }
+
+    fun filter(
+        xProgression: IntProgression = 0 until xMax,
+        yProgression: IntProgression = 0 until yMax,
+        predicate: (itemPosition: ItemPosition<T>) -> Boolean,
+    ): List<ItemPosition<T>> {
+        val destination = mutableListOf<ItemPosition<T>>()
+
+        forEach(xProgression, yProgression) { item ->
+            if (predicate(item)) {
+                destination.add(item)
+            }
+        }
+
+        return destination
+    }
+
+    inline fun forEach(
+        xProgression: IntProgression = 0 until xMax,
+        yProgression: IntProgression = 0 until yMax,
+        action: (itemPosition: ItemPosition<T>) -> Unit,
+    ) {
+        yProgression.forEach { y ->
+            xProgression.forEach { x ->
+                action(get(x, y))
+            }
+        }
+    }
+
+    fun forEachColumn(
+        xProgression: IntProgression = 0 until xMax,
+        yProgression: IntProgression = 0 until yMax,
+        action: (column: Column<T>) -> Unit,
+    ) {
+        // x and y loops are inverted to group by columns
+        xProgression.forEach { x ->
+            val itemsInColumn = mutableListOf<ItemPosition<T>>()
+            yProgression.forEach { y ->
+                itemsInColumn.add(get(x, y))
+            }
+
+            action(
+                Column(
+                    items = itemsInColumn,
+                    x = x,
+                )
+            )
+        }
+    }
+
+    fun forEachRow(
+        xProgression: IntProgression = 0 until xMax,
+        yProgression: IntProgression = 0 until yMax,
+        action: (row: Row<T>) -> Unit,
+    ) {
+        yProgression.forEach { y ->
+            val itemsInRow = mutableListOf<ItemPosition<T>>()
+            xProgression.forEach { x ->
+                itemsInRow.add(get(x, y))
+            }
+
+            action(
+                Row(
+                    items = itemsInRow,
+                    y = y,
+                )
+            )
+        }
     }
 
     override fun toString(): String = joinToString()
@@ -327,5 +383,15 @@ class Plane<T : Any>(
     data class ItemPosition<T>(
         val item: T,
         val position: Position,
+    )
+
+    data class Column<T>(
+        val items: List<ItemPosition<T>>,
+        val x: Int,
+    )
+
+    data class Row<T>(
+        val items: List<ItemPosition<T>>,
+        val y: Int,
     )
 }
