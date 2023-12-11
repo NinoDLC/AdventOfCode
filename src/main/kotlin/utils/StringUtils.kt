@@ -16,5 +16,5 @@ fun String.center(maxWidth: Int): String {
     require(spaceSize >= 0) {
         "Text [$this] with a length of [${this.length}] is longer than maxWidth [$maxWidth]"
     }
-    return " ".repeat((spaceSize + 1) / 2) + this + " ".repeat((spaceSize + 1) / 2)
+    return " ".repeat((spaceSize + 1) / 2) + this + " ".repeat(spaceSize / 2)
 }

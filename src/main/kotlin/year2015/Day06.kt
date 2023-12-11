@@ -1,6 +1,7 @@
 package year2015
 
 import utils.Plane
+import utils.Plane.Companion.sum
 import utils.getPuzzleInput
 import utils.logMeasureTime
 
@@ -37,7 +38,7 @@ class Day06 {
             plane.transform(
                 xProgression = minX.toInt()..maxX.toInt(),
                 yProgression = minY.toInt()..maxY.toInt(),
-            ) { existing: Boolean, _, _ ->
+            ) { (existing: Boolean) ->
                 when (operation) {
                     "toggle" -> !existing
                     "turn on" -> true
@@ -48,7 +49,7 @@ class Day06 {
         }
 
         println(
-            plane.sumOf { turnedOn, _, _ ->
+            plane.sumOf { (turnedOn) ->
                 if (turnedOn) {
                     1
                 } else {
@@ -66,11 +67,11 @@ class Day06 {
             plane.transform(
                 xProgression = minX.toInt()..maxX.toInt(),
                 yProgression = minY.toInt()..maxY.toInt(),
-            ) { existing: Int, _, _ ->
+            ) { (lightValue: Int) ->
                 when (operation) {
-                    "toggle" -> existing + 2
-                    "turn on" -> existing + 1
-                    "turn off" -> (existing - 1).coerceAtLeast(0)
+                    "toggle" -> lightValue + 2
+                    "turn on" -> lightValue + 1
+                    "turn off" -> (lightValue - 1).coerceAtLeast(0)
                     else -> throw IllegalStateException("Unknown operation: $operation")
                 }
             }
