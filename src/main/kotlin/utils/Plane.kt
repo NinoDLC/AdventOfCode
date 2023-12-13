@@ -34,7 +34,7 @@ class Plane<T : Any>(
         }
     }
 
-    private val rows: Array<Array<Any?>> = Array(xMax) { x ->
+    private val plane: Array<Array<Any?>> = Array(xMax) { x ->
         Array(yMax) { y ->
             init(x, y)
         }
@@ -42,11 +42,27 @@ class Plane<T : Any>(
 
     @Suppress("UNCHECKED_CAST")
     fun get(x: Int, y: Int): ItemPosition<T> = ItemPosition(
-        rows[x][y] as T,
+        plane[x][y] as T,
         Position(x, y),
     )
 
     fun get(position: Position): ItemPosition<T> = get(position.x, position.y)
+
+    fun getColumn(
+        x: Int,
+        yProgression: IntProgression = 0 until yMax,
+    ): Column<T> = Column(
+        items = yProgression.map { y -> get(x, y) },
+        x = x,
+    )
+
+    fun getRow(
+        y: Int,
+        xProgression: IntProgression = 0 until xMax,
+    ): Row<T> = Row(
+        items = xProgression.map { x -> get(x, y) },
+        y = y,
+    )
 
     fun upOf(item: T): ItemPosition<T>? = positionOfOrNull { existing -> existing == item }?.let { upOf(it.position) }
 
@@ -114,7 +130,7 @@ class Plane<T : Any>(
      * Transforms an item at said position.
      */
     fun transform(x: Int, y: Int, lambda: (itemPosition: ItemPosition<T>) -> T) {
-        rows[x][y] = lambda(get(x, y))
+        plane[x][y] = lambda(get(x, y))
     }
 
     /**
@@ -126,7 +142,7 @@ class Plane<T : Any>(
         lambda: (itemPosition: ItemPosition<T>) -> T,
     ) {
         forEach(xProgression, yProgression) { item ->
-            rows[item.position.x][item.position.y] = lambda(item)
+            plane[item.position.x][item.position.y] = lambda(item)
         }
     }
 
