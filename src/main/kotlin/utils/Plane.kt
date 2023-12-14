@@ -1,44 +1,89 @@
 package utils
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class Plane<T : Any>(
+class Plane<T : Any> private constructor(
     val xMax: Int,
     val yMax: Int,
-    init: (x: Int, y: Int) -> T,
+    val plane: Array<Array<Any>>,
 ) {
 
     companion object {
-        fun <T : Any> of(lines: List<List<T>>): Plane<T> = Plane(
-            xMax = lines.maxOf { it.size },
-            yMax = lines.size,
-        ) { x, y ->
-            lines[y][x]
+        fun <T : Any> of(lines: List<List<T>>): Plane<T> {
+            val xMax = lines.maxOf { it.size }
+            val yMax = lines.size
+
+            return Plane(
+                xMax = xMax,
+                yMax = yMax,
+                plane = Array(xMax) { x ->
+                    Array(yMax) { y ->
+                        lines[y][x]
+                    }
+                }
+            )
         }
 
         @JvmName("ofStrings")
-        fun of(lines: List<String>): Plane<Char> = Plane(
-            xMax = lines.maxOf { it.length },
-            yMax = lines.size,
-        ) { x, y ->
-            lines[y][x]
+        fun of(lines: List<String>): Plane<Char> {
+            val xMax = lines.maxOf { it.length }
+            val yMax = lines.size
+
+            return Plane(
+                xMax = xMax,
+                yMax = yMax,
+                plane = Array(xMax) { x ->
+                    Array(yMax) { y ->
+                        lines[y][x]
+                    }
+                }
+            )
         }
+
+        fun <T : Any> of(xMax: Int, yMax: Int, init: (x: Int, y: Int) -> T): Plane<T> = Plane(
+            xMax = xMax,
+            yMax = yMax,
+            plane = Array(xMax) { x ->
+                Array(yMax) { y ->
+                    init(x, y)
+                }
+            }
+        )
 
         /**
          * Sum the value from all range-matching items.
          */
         fun Plane<out Number>.sum(
-            xProgression: IntProgression = 0 until xMax,
-            yProgression: IntProgression = 0 until yMax,
+            xProgression: IntProgression = defaultXProgression,
+            yProgression: IntProgression = defaultYProgression,
         ): Long = sumOf(xProgression, yProgression) { (item) ->
             item.toLong()
         }
     }
 
-    private val plane: Array<Array<Any?>> = Array(xMax) { x ->
-        Array(yMax) { y ->
-            init(x, y)
+    val defaultXProgression: IntProgression by lazy { 0 until xMax }
+    val defaultYProgression: IntProgression by lazy { 0 until yMax }
+
+    @Suppress("UNCHECKED_CAST")
+    val columns: List<Column<T>>
+        get() = plane.mapIndexed { x, column ->
+            Column(
+                items = column.mapIndexed { y, item ->
+                    ItemPosition(
+                        item as T,
+                        Position(x, y),
+                    )
+                },
+                x = x,
+            )
         }
-    }
+
+    val rows: List<Row<T>>
+        get() = defaultYProgression.map { y ->
+            Row(
+                items = defaultXProgression.map { x -> get(x, y) },
+                y = y,
+            )
+        }
 
     @Suppress("UNCHECKED_CAST")
     fun get(x: Int, y: Int): ItemPosition<T> = ItemPosition(
@@ -50,7 +95,7 @@ class Plane<T : Any>(
 
     fun getColumn(
         x: Int,
-        yProgression: IntProgression = 0 until yMax,
+        yProgression: IntProgression = defaultYProgression,
     ): Column<T> = Column(
         items = yProgression.map { y -> get(x, y) },
         x = x,
@@ -58,11 +103,33 @@ class Plane<T : Any>(
 
     fun getRow(
         y: Int,
-        xProgression: IntProgression = 0 until xMax,
+        xProgression: IntProgression = defaultXProgression,
     ): Row<T> = Row(
         items = xProgression.map { x -> get(x, y) },
         y = y,
     )
+
+    /**
+     * Set the value at said position.
+     */
+    fun set(x: Int, y: Int, item: T) {
+        plane[x][y] = item
+    }
+
+    /**
+     * Set the value for all range-matching items.
+     */
+    fun set(
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
+        item: T,
+    ) {
+        yProgression.forEach { y ->
+            xProgression.forEach { x ->
+                plane[x][y] = item
+            }
+        }
+    }
 
     fun upOf(item: T): ItemPosition<T>? = positionOfOrNull { existing -> existing == item }?.let { upOf(it.position) }
 
@@ -105,8 +172,8 @@ class Plane<T : Any>(
     }
 
     fun positionOfOrNull(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): ItemPosition<T>? {
         forEach(xProgression, yProgression) { item ->
@@ -119,8 +186,8 @@ class Plane<T : Any>(
     }
 
     fun positionOf(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): ItemPosition<T> = positionOfOrNull(xProgression, yProgression, predicate) ?: throw IllegalStateException(
         "Couldn't find the matching item's position in xProgression = $xProgression and yProgression = $yProgression"
@@ -137,8 +204,8 @@ class Plane<T : Any>(
      * Transforms all range-matching items, in the reading order (left to right, then on end of line to the next line, etc...)
      */
     fun transform(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         lambda: (itemPosition: ItemPosition<T>) -> T,
     ) {
         forEach(xProgression, yProgression) { item ->
@@ -150,8 +217,8 @@ class Plane<T : Any>(
      * Accumulate a value from all range-matching items.
      */
     fun <R> fold(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         initialValue: R,
         operation: (acc: R, itemPosition: ItemPosition<T>) -> R,
     ): R {
@@ -166,16 +233,16 @@ class Plane<T : Any>(
      * Sum the value from all range-matching items.
      */
     fun sumOf(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         operation: (itemPosition: ItemPosition<T>) -> Long,
     ): Long = fold(xProgression, yProgression, 0) { acc: Long, itemPosition: ItemPosition<T> ->
         acc + operation(itemPosition)
     }
 
     fun all(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): Boolean {
         forEach(xProgression, yProgression) { item ->
@@ -188,8 +255,8 @@ class Plane<T : Any>(
     }
 
     fun any(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): Boolean {
         forEach(xProgression, yProgression) { item ->
@@ -202,8 +269,8 @@ class Plane<T : Any>(
     }
 
     fun none(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): Boolean {
         forEach(xProgression, yProgression) { item ->
@@ -216,8 +283,8 @@ class Plane<T : Any>(
     }
 
     fun filter(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         predicate: (itemPosition: ItemPosition<T>) -> Boolean,
     ): List<ItemPosition<T>> {
         val destination = mutableListOf<ItemPosition<T>>()
@@ -232,8 +299,8 @@ class Plane<T : Any>(
     }
 
     inline fun forEach(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         action: (itemPosition: ItemPosition<T>) -> Unit,
     ) {
         yProgression.forEach { y ->
@@ -244,8 +311,8 @@ class Plane<T : Any>(
     }
 
     fun forEachColumn(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         action: (column: Column<T>) -> Unit,
     ) {
         // x and y loops are inverted to group by columns
@@ -265,8 +332,8 @@ class Plane<T : Any>(
     }
 
     fun forEachRow(
-        xProgression: IntProgression = 0 until xMax,
-        yProgression: IntProgression = 0 until yMax,
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
         action: (row: Row<T>) -> Unit,
     ) {
         yProgression.forEach { y ->
@@ -284,11 +351,11 @@ class Plane<T : Any>(
         }
     }
 
-    override fun toString(): String = joinToString()
+    fun clone(): Plane<T> = Plane(xMax, yMax, Array(plane.size) { plane[it].copyOf() })
 
     fun joinToString(
-        xWindow: IntProgression = 0 until xMax,
-        yWindow: IntProgression = 0 until yMax,
+        xWindow: IntProgression = defaultXProgression,
+        yWindow: IntProgression = defaultYProgression,
         withPrettify: Boolean = true,
         extraPadding: Int = 0,
         itemTransform: (itemPosition: ItemPosition<T>) -> String = { (item) -> item.toString() },
@@ -303,8 +370,8 @@ class Plane<T : Any>(
     )
 
     fun joinToString(
-        xWindow: IntProgression = 0 until xMax,
-        yWindow: IntProgression = 0 until yMax,
+        xWindow: IntProgression = defaultXProgression,
+        yWindow: IntProgression = defaultYProgression,
         withColumnsIndicator: Boolean = true,
         withRowsIndicator: Boolean = true,
         withSeparators: Boolean = true,
@@ -395,6 +462,28 @@ class Plane<T : Any>(
 
         return stringBuilder.toString()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Plane<*>
+
+        if (xMax != other.xMax) return false
+        if (yMax != other.yMax) return false
+        if (!plane.contentDeepEquals(other.plane)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = xMax
+        result = 31 * result + yMax
+        result = 31 * result + plane.contentDeepHashCode()
+        return result
+    }
+
+    override fun toString(): String = joinToString()
 
     data class ItemPosition<T>(
         val item: T,

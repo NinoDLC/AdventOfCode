@@ -31,7 +31,7 @@ class Day06 {
     }
 
     private fun partOne(lines: List<String>) {
-        val plane = Plane(1_000, 1_000) { _, _ -> false }
+        val plane = Plane.of(1_000, 1_000) { _, _ -> false }
 
         lines.forEach { line ->
             val (operation, minX, minY, maxX, maxY) = INSTRUCTION_REGEX.find(line)!!.destructured
@@ -60,7 +60,7 @@ class Day06 {
     }
 
     private fun partTwo(lines: List<String>) {
-        val plane = Plane(1_000, 1_000) { _, _ -> 0 }
+        val plane = Plane.of(1_000, 1_000) { _, _ -> 0 }
 
         lines.forEach { line ->
             val (operation, minX, minY, maxX, maxY) = INSTRUCTION_REGEX.find(line)!!.destructured
