@@ -1,5 +1,6 @@
 package year2022
 
+import utils.getPuzzleInput
 import utils.logMeasureTime
 import java.io.File
 
@@ -8,7 +9,7 @@ class Day01Hybrid {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            val lines = File("data/2022/day01.txt").readLines()
+            val lines = getPuzzleInput(this)
 
             println("=== Part One ===")
             logMeasureTime {
