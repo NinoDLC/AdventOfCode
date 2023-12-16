@@ -23,6 +23,26 @@ class Plane<T : Any> private constructor(
             )
         }
 
+        fun <T, R : Any> of(lines: List<List<T>>, init: (itemPosition: ItemPosition<T>) -> R): Plane<R> {
+            val xMax = lines.maxOf { it.size }
+            val yMax = lines.size
+
+            return Plane(
+                xMax = xMax,
+                yMax = yMax,
+                plane = Array(xMax) { x ->
+                    Array(yMax) { y ->
+                        init(
+                            ItemPosition(
+                                lines[y][x],
+                                Position(x, y),
+                            )
+                        )
+                    }
+                }
+            )
+        }
+
         @JvmName("ofStrings")
         fun of(lines: List<String>): Plane<Char> {
             val xMax = lines.maxOf { it.length }
@@ -34,6 +54,27 @@ class Plane<T : Any> private constructor(
                 plane = Array(xMax) { x ->
                     Array(yMax) { y ->
                         lines[y][x]
+                    }
+                }
+            )
+        }
+
+        @JvmName("ofStrings")
+        fun <T : Any> of(lines: List<String>, init: (itemPosition: ItemPosition<Char>) -> T): Plane<T> {
+            val xMax = lines.maxOf { it.length }
+            val yMax = lines.size
+
+            return Plane(
+                xMax = xMax,
+                yMax = yMax,
+                plane = Array(xMax) { x ->
+                    Array(yMax) { y ->
+                        init(
+                            ItemPosition(
+                                lines[y][x],
+                                Position(x, y),
+                            )
+                        )
                     }
                 }
             )
@@ -86,12 +127,12 @@ class Plane<T : Any> private constructor(
         }
 
     @Suppress("UNCHECKED_CAST")
-    fun get(x: Int, y: Int): ItemPosition<T> = ItemPosition(
+    operator fun get(x: Int, y: Int): ItemPosition<T> = ItemPosition(
         plane[x][y] as T,
         Position(x, y),
     )
 
-    fun get(position: Position): ItemPosition<T> = get(position.x, position.y)
+    operator fun get(position: Position): ItemPosition<T> = get(position.x, position.y)
 
     fun getColumn(
         x: Int,
@@ -112,8 +153,15 @@ class Plane<T : Any> private constructor(
     /**
      * Set the value at said position.
      */
-    fun set(x: Int, y: Int, item: T) {
+    operator fun set(x: Int, y: Int, item: T) {
         plane[x][y] = item
+    }
+
+    /**
+     * Set the value at said position.
+     */
+    operator fun set(position: Position, item: T) {
+        plane[position.x][position.y] = item
     }
 
     /**
@@ -217,9 +265,9 @@ class Plane<T : Any> private constructor(
      * Accumulate a value from all range-matching items.
      */
     fun <R> fold(
+        initialValue: R,
         xProgression: IntProgression = defaultXProgression,
         yProgression: IntProgression = defaultYProgression,
-        initialValue: R,
         operation: (acc: R, itemPosition: ItemPosition<T>) -> R,
     ): R {
         var accumulator = initialValue
@@ -236,7 +284,7 @@ class Plane<T : Any> private constructor(
         xProgression: IntProgression = defaultXProgression,
         yProgression: IntProgression = defaultYProgression,
         operation: (itemPosition: ItemPosition<T>) -> Long,
-    ): Long = fold(xProgression, yProgression, 0) { acc: Long, itemPosition: ItemPosition<T> ->
+    ): Long = fold(0, xProgression, yProgression) { acc: Long, itemPosition: ItemPosition<T> ->
         acc + operation(itemPosition)
     }
 
