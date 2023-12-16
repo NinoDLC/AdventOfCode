@@ -109,10 +109,10 @@ class Day01 {
     private fun getNewOrientation(
         instruction: Instruction,
         previousPosition: Position
-    ) = Orientation.values()[
+    ) = Orientation.entries[
         when (instruction.turnDirection) {
-            TurnDirection.LEFT -> (previousPosition.orientation.ordinal + (Orientation.values().count() - 1)) % Orientation.values().count()
-            TurnDirection.RIGHT -> (previousPosition.orientation.ordinal + 1) % Orientation.values().count()
+            TurnDirection.LEFT -> (previousPosition.orientation.ordinal + (Orientation.entries.count() - 1)) % Orientation.entries.count()
+            TurnDirection.RIGHT -> (previousPosition.orientation.ordinal + 1) % Orientation.entries.count()
         }
     ]
 

@@ -119,27 +119,6 @@ class Day05 {
         }
     }
 
-    private fun printPoints(points: List<PointAndCount>) {
-        val stringBuilder = StringBuilder()
-
-        val jMax = points.maxOf { it.y }
-        val iMax = points.maxOf { it.x }
-
-        for (j in 0..jMax) {
-            for (i in 0..iMax) {
-                val existing = points.find {
-                    it.x == i && it.y == j
-                }
-
-                stringBuilder.append(
-                    existing?.count ?: "."
-                )
-            }
-            stringBuilder.append("\n")
-        }
-        println(stringBuilder.toString())
-    }
-
     private data class PointAndCount(
         val x: Int,
         val y: Int,

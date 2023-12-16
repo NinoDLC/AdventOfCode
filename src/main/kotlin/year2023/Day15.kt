@@ -2,7 +2,6 @@ package year2023
 
 import utils.getPuzzleInput
 import utils.logMeasureTime
-import java.util.*
 
 class Day15 {
 

@@ -88,11 +88,8 @@ class Day02 {
         SCISSORS('C', 'Z', 3);
 
         companion object {
-            fun fromOpponent(char: Char): Play = Play.values().find { it.opponent == char }
-                ?: throw IllegalStateException("Unknown play: $char")
-
-            fun fromYou(char: Char): Play = Play.values().find { it.you == char }
-                ?: throw IllegalStateException("Unknown play: $char")
+            fun fromOpponent(char: Char): Play = entries.find { it.opponent == char } ?: throw IllegalStateException("Unknown play: $char")
+            fun fromYou(char: Char): Play = entries.find { it.you == char } ?: throw IllegalStateException("Unknown play: $char")
         }
     }
 
@@ -102,8 +99,7 @@ class Day02 {
         WIN('Z');
 
         companion object {
-            fun from(char: Char): Outcome = Outcome.values().find { it.outcome == char }
-                ?: throw IllegalStateException("Unknown outcome: $char")
+            fun from(char: Char): Outcome = entries.find { it.outcome == char } ?: throw IllegalStateException("Unknown outcome: $char")
         }
     }
 }

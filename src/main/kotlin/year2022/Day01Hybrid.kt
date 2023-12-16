@@ -2,7 +2,6 @@ package year2022
 
 import utils.getPuzzleInput
 import utils.logMeasureTime
-import java.io.File
 
 class Day01Hybrid {
 

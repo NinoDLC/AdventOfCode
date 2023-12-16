@@ -128,7 +128,7 @@ class Day11 {
             override fun getLevelWorryLevel(value: Long): Long = value * operand
         }
 
-        object Squared : Operation() {
+        data object Squared : Operation() {
             override fun getLevelWorryLevel(value: Long): Long = value * value
         }
     }

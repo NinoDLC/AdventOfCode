@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package utils
 
 fun Long.lcm(other: Long): Long = (this * other) / this.gcd(other)

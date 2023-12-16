@@ -97,7 +97,7 @@ class Day10 {
     ): Long {
         crawledTiles.add(currentTile)
 
-        val nextTile = plane.get(
+        val nextTile = plane[
             when (currentTile.item) {
                 HORIZONTAL -> if (currentTile.position.isToTheRightOf(previousTile.position)) {
                     currentTile.position.toRight()
@@ -141,7 +141,7 @@ class Day10 {
 
                 START -> return crawledDistance + 1
             }
-        )
+        ]
 
         return crawlUntilStart(plane, crawledTiles, currentTile, nextTile, crawledDistance + 1)
     }

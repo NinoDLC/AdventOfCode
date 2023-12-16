@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package utils
 
 fun Int.isTrueAtBitPosition(bitPosition: Int): Boolean {
