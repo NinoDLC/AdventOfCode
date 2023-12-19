@@ -15,6 +15,14 @@ data class Position(
     fun toLeft() = copy(x = x - 1)
     fun toUpLeft() = copy(x = x - 1, y = y - 1)
 
+    val neighbours: List<Position>
+        get() = listOf(
+            toUp(),
+            toRight(),
+            toDown(),
+            toLeft(),
+        )
+
     fun isToTheUpOf(other: Position) = y < other.y
     fun isToTheUpRightOf(other: Position) = x > other.x && y < other.y
     fun isToTheRightOf(other: Position) = x > other.x
