@@ -401,20 +401,17 @@ class Plane<T : Any> private constructor(
 
     fun clone(): Plane<T> = Plane(xMax, yMax, Array(plane.size) { plane[it].copyOf() })
 
-    fun joinToString(
+    fun <R : Any> map(map: (itemPosition: ItemPosition<T>) -> R): Plane<R> = of(xMax, yMax) { x, y -> map(get(x, y)) }
+
+    fun toSimpleString(
         xWindow: IntProgression = defaultXProgression,
         yWindow: IntProgression = defaultYProgression,
-        withPrettify: Boolean = true,
-        extraPadding: Int = 0,
-        itemTransform: (itemPosition: ItemPosition<T>) -> String = { (item) -> item.toString() },
     ): String = joinToString(
         xWindow = xWindow,
         yWindow = yWindow,
-        withColumnsIndicator = withPrettify,
-        withRowsIndicator = withPrettify,
-        withSeparators = withPrettify,
-        extraPadding = extraPadding,
-        itemTransform = itemTransform,
+        withColumnsIndicator = false,
+        withRowsIndicator = false,
+        withSeparators = false,
     )
 
     fun joinToString(
