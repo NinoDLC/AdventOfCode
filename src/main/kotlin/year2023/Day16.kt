@@ -1,10 +1,7 @@
 package year2023
 
-import utils.Plane
-import utils.Position
-import utils.getPuzzleInput
-import utils.logMeasureTime
-import year2023.Day16.Direction.*
+import utils.*
+import utils.Direction.*
 
 class Day16 {
 
@@ -28,7 +25,7 @@ class Day16 {
     }
 
     private fun partOne(lines: List<String>) {
-        println(getEnergizedTileCount(lines, LightBeam(Position(0, 0), RIGHTWARD)))
+        println(getEnergizedTileCount(lines, LightBeam(Position(0, 0), EAST)))
     }
 
     private fun partTwo(lines: List<String>) {
@@ -44,10 +41,10 @@ class Day16 {
                             lightBeam = LightBeam(
                                 position = Position(x, y),
                                 direction = when {
-                                    x == 0 -> RIGHTWARD
-                                    y == 0 -> DOWNWARD
-                                    x == xMax - 1 -> LEFTWARD
-                                    y == yMax - 1 -> UPWARD
+                                    x == 0 -> EAST
+                                    y == 0 -> SOUTH
+                                    x == xMax - 1 -> WEST
+                                    y == yMax - 1 -> NORTH
                                     else -> throw IllegalStateException("Impossible to find starting direction for x = $x and y = $y")
                                 }
                             )
@@ -94,45 +91,45 @@ class Day16 {
 
                 '|' -> {
                     when (lightBeam.direction) {
-                        UPWARD,
-                        DOWNWARD -> crawl(plane, lightBeamsPlane, lightBeam.prolong())
+                        NORTH,
+                        SOUTH -> crawl(plane, lightBeamsPlane, lightBeam.prolong())
 
-                        LEFTWARD,
-                        RIGHTWARD -> {
-                            crawl(plane, lightBeamsPlane, lightBeam.redirect(UPWARD))
-                            crawl(plane, lightBeamsPlane, lightBeam.redirect(DOWNWARD))
+                        WEST,
+                        EAST -> {
+                            crawl(plane, lightBeamsPlane, lightBeam.redirect(NORTH))
+                            crawl(plane, lightBeamsPlane, lightBeam.redirect(SOUTH))
                         }
                     }
                 }
 
                 '-' -> {
                     when (lightBeam.direction) {
-                        UPWARD,
-                        DOWNWARD -> {
-                            crawl(plane, lightBeamsPlane, lightBeam.redirect(LEFTWARD))
-                            crawl(plane, lightBeamsPlane, lightBeam.redirect(RIGHTWARD))
+                        NORTH,
+                        SOUTH -> {
+                            crawl(plane, lightBeamsPlane, lightBeam.redirect(WEST))
+                            crawl(plane, lightBeamsPlane, lightBeam.redirect(EAST))
                         }
 
-                        LEFTWARD,
-                        RIGHTWARD -> crawl(plane, lightBeamsPlane, lightBeam.prolong())
+                        WEST,
+                        EAST -> crawl(plane, lightBeamsPlane, lightBeam.prolong())
                     }
                 }
 
                 '/' -> {
                     when (lightBeam.direction) {
-                        UPWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(RIGHTWARD))
-                        LEFTWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(DOWNWARD))
-                        DOWNWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(LEFTWARD))
-                        RIGHTWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(UPWARD))
+                        NORTH -> crawl(plane, lightBeamsPlane, lightBeam.redirect(EAST))
+                        WEST -> crawl(plane, lightBeamsPlane, lightBeam.redirect(SOUTH))
+                        SOUTH -> crawl(plane, lightBeamsPlane, lightBeam.redirect(WEST))
+                        EAST -> crawl(plane, lightBeamsPlane, lightBeam.redirect(NORTH))
                     }
                 }
 
                 '\\' -> {
                     when (lightBeam.direction) {
-                        UPWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(LEFTWARD))
-                        LEFTWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(UPWARD))
-                        DOWNWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(RIGHTWARD))
-                        RIGHTWARD -> crawl(plane, lightBeamsPlane, lightBeam.redirect(DOWNWARD))
+                        NORTH -> crawl(plane, lightBeamsPlane, lightBeam.redirect(WEST))
+                        WEST -> crawl(plane, lightBeamsPlane, lightBeam.redirect(NORTH))
+                        SOUTH -> crawl(plane, lightBeamsPlane, lightBeam.redirect(EAST))
+                        EAST -> crawl(plane, lightBeamsPlane, lightBeam.redirect(SOUTH))
                     }
                 }
 
@@ -147,28 +144,21 @@ class Day16 {
     ) {
         fun prolong(): LightBeam = copy(
             position = when (direction) {
-                UPWARD -> position.toUp()
-                LEFTWARD -> position.toLeft()
-                DOWNWARD -> position.toDown()
-                RIGHTWARD -> position.toRight()
+                NORTH -> position.toNorth()
+                WEST -> position.toWest()
+                SOUTH -> position.toSouth()
+                EAST -> position.toEast()
             }
         )
 
         fun redirect(newDirection: Direction): LightBeam = copy(
             position = when (newDirection) {
-                UPWARD -> position.toUp()
-                LEFTWARD -> position.toLeft()
-                DOWNWARD -> position.toDown()
-                RIGHTWARD -> position.toRight()
+                NORTH -> position.toNorth()
+                WEST -> position.toWest()
+                SOUTH -> position.toSouth()
+                EAST -> position.toEast()
             },
             direction = newDirection,
         )
-    }
-
-    private enum class Direction {
-        UPWARD,
-        LEFTWARD,
-        DOWNWARD,
-        RIGHTWARD,
     }
 }

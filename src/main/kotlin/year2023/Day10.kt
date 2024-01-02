@@ -99,40 +99,40 @@ class Day10 {
 
         val nextTile = plane[
             when (currentTile.item) {
-                HORIZONTAL -> if (currentTile.position.isToTheRightOf(previousTile.position)) {
-                    currentTile.position.toRight()
+                HORIZONTAL -> if (currentTile.position.isToTheEastOf(previousTile.position)) {
+                    currentTile.position.toEast()
                 } else {
-                    currentTile.position.toLeft()
+                    currentTile.position.toWest()
                 }
 
-                VERTICAL -> if (currentTile.position.isToTheUpOf(previousTile.position)) {
-                    currentTile.position.toUp()
+                VERTICAL -> if (currentTile.position.isToTheNorthOf(previousTile.position)) {
+                    currentTile.position.toNorth()
                 } else {
-                    currentTile.position.toDown()
+                    currentTile.position.toSouth()
                 }
 
-                NORTH_EAST -> if (currentTile.position.isToTheLeftOf(previousTile.position)) {
-                    currentTile.position.toUp()
+                NORTH_EAST -> if (currentTile.position.isToTheWestOf(previousTile.position)) {
+                    currentTile.position.toNorth()
                 } else {
-                    currentTile.position.toRight()
+                    currentTile.position.toEast()
                 }
 
-                NORTH_WEST -> if (currentTile.position.isToTheRightOf(previousTile.position)) {
-                    currentTile.position.toUp()
+                NORTH_WEST -> if (currentTile.position.isToTheEastOf(previousTile.position)) {
+                    currentTile.position.toNorth()
                 } else {
-                    currentTile.position.toLeft()
+                    currentTile.position.toWest()
                 }
 
-                SOUTH_WEST -> if (currentTile.position.isToTheRightOf(previousTile.position)) {
-                    currentTile.position.toDown()
+                SOUTH_WEST -> if (currentTile.position.isToTheEastOf(previousTile.position)) {
+                    currentTile.position.toSouth()
                 } else {
-                    currentTile.position.toLeft()
+                    currentTile.position.toWest()
                 }
 
-                SOUTH_EAST -> if (currentTile.position.isToTheLeftOf(previousTile.position)) {
-                    currentTile.position.toDown()
+                SOUTH_EAST -> if (currentTile.position.isToTheWestOf(previousTile.position)) {
+                    currentTile.position.toSouth()
                 } else {
-                    currentTile.position.toRight()
+                    currentTile.position.toEast()
                 }
 
                 GROUND -> throw IllegalStateException(
