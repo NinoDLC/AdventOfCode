@@ -1,6 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.9.21'
-    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '2.2.21'
 }
 
 group = 'fr.delcey'
@@ -10,22 +11,12 @@ repositories {
     mavenCentral()
 }
 
-test {
-    useJUnit()
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = '17'
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = '17'
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
+    }
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0-RC")
-}
-
-application {
-    mainClassName = 'MainKt'
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
