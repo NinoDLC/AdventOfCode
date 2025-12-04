@@ -25,6 +25,18 @@ data class Position(
             toWest(),
         )
 
+    val neighboursSquare: List<Position>
+        get() = listOf(
+            toNorth(),
+            toNorthEast(),
+            toEast(),
+            toSouthEast(),
+            toSouth(),
+            toSouthWest(),
+            toWest(),
+            toNorthWest(),
+        )
+
     fun isToTheNorthOf(other: Position) = y < other.y
     fun isToTheNorthEastOf(other: Position) = x > other.x && y < other.y
     fun isToTheEastOf(other: Position) = x > other.x

@@ -1,6 +1,6 @@
 package utils
 
-@Suppress("MemberVisibilityCanBePrivate", "unused")
+@Suppress("unused")
 class Plane<T : Any> private constructor(
     val xMax: Int,
     val yMax: Int,
@@ -133,6 +133,14 @@ class Plane<T : Any> private constructor(
     )
 
     operator fun get(position: Position): ItemPosition<T> = get(position.x, position.y)
+
+    @Suppress("UNCHECKED_CAST")
+    fun getOrNull(x: Int, y: Int): ItemPosition<T?> = ItemPosition(
+        plane.getOrNull(x)?.getOrNull(y) as T?,
+        Position(x, y),
+    )
+
+    fun getOrNull(position: Position): ItemPosition<T?> = getOrNull(position.x, position.y)
 
     fun getColumn(
         x: Int,
@@ -286,6 +294,20 @@ class Plane<T : Any> private constructor(
         operation: (itemPosition: ItemPosition<T>) -> Long,
     ): Long = fold(0, xProgression, yProgression) { acc: Long, itemPosition: ItemPosition<T> ->
         acc + operation(itemPosition)
+    }
+
+    fun count(
+        xProgression: IntProgression = defaultXProgression,
+        yProgression: IntProgression = defaultYProgression,
+        predicate: (itemPosition: ItemPosition<T>) -> Boolean,
+    ): Int {
+        var count = 0
+        forEach(xProgression, yProgression) { item ->
+            if (predicate(item)) {
+                count++
+            }
+        }
+        return count
     }
 
     fun all(
